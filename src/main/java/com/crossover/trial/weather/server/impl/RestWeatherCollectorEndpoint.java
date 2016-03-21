@@ -36,23 +36,25 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 
 	@Override
 	public Response updateWeather(String iataCode, String pointType, String datapointJson) {
-		
+
+		LOGGER.log(Level.FINE, "Requesting update weater information");
+
 		try {
 			
-			ValidationUtility.checkIataCode(iataCode);
+			iataCode = ValidationUtility.checkIataCode(iataCode);
 			
 			ValidationUtility.checkNotNull("point type", pointType);
 			
-			DataPoint dataPoint = ValidationUtility.isA(DataPoint.class, "request body", datapointJson);
+			DataPoint dataPoint = ValidationUtility.jsonIsA(DataPoint.class, "request body", datapointJson);
 			
 			Repository.getInstance().addDataPoint(iataCode, pointType, dataPoint);
 			
 		} catch (WeatherValidationException e) {
-			LOGGER.log(Level.INFO, "Validation error: " + e.getMessage(), e);
+			LOGGER.log(Level.INFO, "Validation error: " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
 		} catch (WeatherException e) {
-			LOGGER.log(Level.SEVERE, "Cannot add datapoint: " + e.getMessage(), e);
-			Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Cannot add datapoint: " + e.getMessage()).build();
+			LOGGER.log(Level.INFO, "Validation error: " + e.getMessage());
+			return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 		
 		return Response.status(Response.Status.OK).build();
@@ -61,7 +63,10 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 
 	@Override
 	public Response getAirports() {
-		return Response.status(Response.Status.OK).entity(Repository.getInstance().getAirports()).build();
+		return Response
+				.status(Response.Status.OK)
+				.entity(Repository.getInstance().getAirports())
+				.build();
 	}
 
 	@Override
@@ -69,7 +74,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 		
 		try {
 			
-			ValidationUtility.checkIataCode(iataCode);
+			iataCode = ValidationUtility.checkIataCode(iataCode);
 
 			AirportData ad = Repository.getInstance().findAirportData(iataCode);
 			if ( ad == null ) {
@@ -80,6 +85,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 			}
 
 		} catch (WeatherValidationException e) {
+			LOGGER.log(Level.INFO, "Validation error: " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 		
@@ -96,7 +102,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 			double latitude = ValidationUtility.isADouble("latitude", latString);
 			double longitude = ValidationUtility.isADouble("longitude", longString);
 			
-			ValidationUtility.checkIataCode(iataCode);
+			iataCode = ValidationUtility.checkIataCode(iataCode);
 			ValidationUtility.checkLatitude(latitude);
 			ValidationUtility.checkLongitude(longitude);
 			
@@ -105,6 +111,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 		} catch (NumberFormatException e) {
 			return Response.status(Response.Status.BAD_REQUEST).entity("Latitude and Longitude must be valid numbers").build();
 		} catch (WeatherValidationException e) {
+			LOGGER.log(Level.INFO, "Validation error: " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 		
@@ -116,7 +123,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 		
 		try {
 			
-			ValidationUtility.checkIataCode(iataCode);
+			iataCode = ValidationUtility.checkIataCode(iataCode);
 			
 			if (Repository.getInstance().deleteAirport(iataCode)) {
 				return Response.status(Response.Status.OK).build();
@@ -125,6 +132,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 			return Response.status(Response.Status.NOT_FOUND).build();
 			
 		} catch (WeatherValidationException e) {
+			LOGGER.log(Level.INFO, "Validation error: " + e.getMessage());
 			return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 		

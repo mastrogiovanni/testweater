@@ -88,7 +88,7 @@ public class Repository {
 
 		ValidationUtility.checkRadius(radius);
 
-		ValidationUtility.checkIataCode(iataCode);
+		iataCode = ValidationUtility.checkIataCode(iataCode);
 
 		AirportData origin = airportData.get(iataCode);
 

@@ -124,7 +124,25 @@ public class WeatherEndpointTest {
     	
     	response = _update.addAirport(null, null, null);
         Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-    	
+
+    	response = _update.addAirport("pi", null, null);
+        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+    	response = _update.addAirport("pip", null, null);
+        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+    	response = _update.addAirport("pip", "23b", null);
+        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+    	response = _update.addAirport("pip", "23", "wer");
+        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+    	response = _update.addAirport("pip", "23,23", "12.45");
+        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+    	response = _update.addAirport("pip", "23.23", "12.45");
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
     }
     
 
