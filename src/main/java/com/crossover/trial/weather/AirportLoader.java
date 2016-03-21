@@ -1,4 +1,4 @@
-package com.crossover.trial.weather.utility;
+package com.crossover.trial.weather;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,15 +23,11 @@ import com.csvreader.CsvReader;
  */
 public class AirportLoader {
 
-    /** end point for read queries */
-    private WebTarget query;
-
     /** end point to supply updates */
     private WebTarget collect;
 
     public AirportLoader() {
         Client client = ClientBuilder.newClient();
-        query = client.target("http://localhost:9090/query");
         collect = client.target("http://localhost:9090/collect");
     }
 
@@ -45,22 +41,22 @@ public class AirportLoader {
 			
 			String[] values = reader.getValues();
 			
-			String index = get(values, 0);
+			// String index = get(values, 0);
 
 			// Main city served by airport. May be spelled differently from name.
-			String description = get(values, 1);
+			// String description = get(values, 1);
 
 			// Main city served by airport. May be spelled differently from name.
-			String city = get(values, 2);
+			// String city = get(values, 2);
 			
 			// Country or territory where airport is located.
-			String country = get(values, 3);
+			// String country = get(values, 3);
 			
 			// 3-letter FAA code or IATA code (blank or "" if not assigned)
 			String iata = StringUtils.stripToEmpty(get(values, 4));
 			
 			// 4-letter ICAO code (blank or "" if not assigned)
-			String icao = StringUtils.stripToEmpty(get(values, 5));
+			// String icao = StringUtils.stripToEmpty(get(values, 5));
 			
 			// Decimal degrees, up to 6 significant digits. Negative is South, positive is North.
 			String latitude = get(values, 6);
@@ -69,25 +65,29 @@ public class AirportLoader {
 			String longitude = get(values, 7);
 			
 			// In feet
-			String altitude = get(values, 8);
+			// String altitude = get(values, 8);
 			
 			// Hours offset from UTC. Fractional hours are expressed as decimals. (e.g. India is 5.5)
-			String timezone = get(values, 9);
+			// String timezone = get(values, 9);
 			
 			// One of E (Europe), A (US/Canada), S (South America), O (Australia), Z (New Zealand), N (None) or U (Unknown) 
-			String dst = get(values, 10);
-			
+			// String dst = get(values, 10);
+
 	        WebTarget path = collect.path("/airport/" + iata + "/" + latitude + "/" + longitude);
 	        Response post = path.request().post(Entity.entity("", "application/json"));
-	        dump(post, path);
+	        if ( post.getStatus() != Response.Status.OK.getStatusCode() ) {
+	        	System.out.println("Error in saving airport: " + post.getEntity().toString());
+	        	break;
+	        }
+	        // dump(post, path);
 
 		}
 		
     }
 
-    private void dump(Response response, WebTarget path) {
-        System.out.println(path.getUri() + ": (" + response.getStatusInfo() + ") - " + response.readEntity(String.class));
-    }
+//    private void dump(Response response, WebTarget path) {
+//        System.out.println(path.getUri() + ": (" + response.getStatusInfo() + ") - " + response.readEntity(String.class));
+//    }
 
 	private String get(String[] list, int index) {
 		if ( index >= list.length ) {

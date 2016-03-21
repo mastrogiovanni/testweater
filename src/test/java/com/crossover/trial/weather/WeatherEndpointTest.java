@@ -1,5 +1,15 @@
 package com.crossover.trial.weather;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+
+import javax.ws.rs.core.Response;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.crossover.trial.weather.entity.AtmosphericInformation;
 import com.crossover.trial.weather.entity.DataPoint;
 import com.crossover.trial.weather.entity.Repository;
@@ -10,12 +20,6 @@ import com.crossover.trial.weather.server.impl.RestWeatherQueryEndpoint;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class WeatherEndpointTest {
 
@@ -91,5 +95,37 @@ public class WeatherEndpointTest {
         assertEquals(ais.get(0).getWind(), windDp);
         assertEquals(ais.get(0).getCloudCover(), cloudCoverDp);
     }
+    
+    @Test
+    public void testBadUpdate() throws Exception {
+
+        DataPoint windDp = new DataPoint.Builder()
+                .withCount(10)
+                .withFirst(10)
+                .withMedian(20)
+                .withLast(30)
+                .withMean(22).build();
+        
+        Response response = _update.updateWeather("PIPPO", "wind", _gson.toJson(windDp));
+        Assert.assertNotEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        response = _update.updateWeather("pi", "wind", _gson.toJson(windDp));
+        Assert.assertNotEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        response = _update.updateWeather("BOS", "wind", _gson.toJson(windDp));
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+    }
+    
+    @Test
+    public void testBadAirportInsert() {
+    	
+    	Response response = null;
+    	
+    	response = _update.addAirport(null, null, null);
+        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    	
+    }
+    
 
 }

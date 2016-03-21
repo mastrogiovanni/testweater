@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-import com.crossover.trial.weather.WeatherException;
-import com.crossover.trial.weather.entity.AirportData;
 import com.crossover.trial.weather.entity.AtmosphericInformation;
 import com.crossover.trial.weather.entity.Repository;
 import com.crossover.trial.weather.entity.Statistics;
+import com.crossover.trial.weather.exception.WeatherValidationException;
 import com.crossover.trial.weather.server.WeatherQueryEndpoint;
-import com.crossover.trial.weather.utility.NumberUtility;
+import com.crossover.trial.weather.utility.ValidationUtility;
 import com.google.gson.Gson;
 
 /**
@@ -51,6 +51,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     	healthStatus.put("radius_freq", Statistics.getInstance().getRadiusFreqHistogram());
     	
     	return gson.toJson(healthStatus);
+    	
     }
 
     /**
@@ -65,37 +66,33 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     @Override
     public Response weather(String iataCode, String radiusString) {
     	
-    	// Get number and adjust it to zero eventually
-    	Double radius = NumberUtility.parseDoubleOrNull(radiusString);
-    	
-    	if ( radius == null ) {
-        	return Response.status(Response.Status.BAD_REQUEST).entity("Radius must be a number greater or equal to zero").build();
-    	}
-
-    	// Negative radius are not allowed
-    	if ( radius < 0 ) {
-        	return Response.status(Response.Status.BAD_REQUEST).entity("Radius must be a number greater or equal to zero").build();
-    	}
-
-    	// Update statistics on data
-    	Statistics.getInstance().updateRequestFrequency(iataCode, radius);
-    	
-    	// Get list of airport in a given range
-    	List<AirportData> airportInRadius;
-    	
 		try {
-			airportInRadius = Repository.getInstance().getAirportsFromIataInRadius(iataCode, radius);
-		} catch (WeatherException e) {
-        	return Response.status(Response.Status.BAD_REQUEST).build();
-		}
+			
+			ValidationUtility.checkIataCode(iataCode);
+			
+			double radius = ValidationUtility.isADouble("radius", radiusString);
+			
+			ValidationUtility.checkRadius(radius);
 
-    	// Result of atmosferical conditions
-    	List<AtmosphericInformation> result = new ArrayList<>();
-    	
-    	// Get atmosferical informations of given airports
-    	airportInRadius.stream().map(airport -> Repository.getInstance().getAtmosphericInformation(airport.getIata())).filter(ai -> ai.hasSomeValue()).forEach(result::add);
-    	
-        return Response.status(Response.Status.OK).entity(result).build();
+	    	// Update statistics on data
+	    	Statistics.getInstance().updateRequestFrequency(iataCode, radius);
+	    	
+	    	// Result of atmosferical conditions
+	    	List<AtmosphericInformation> result = new ArrayList<>();
+	    	
+	    	Repository.getInstance()
+	    		.getAirportsFromIataInRadius(iataCode, radius)
+	    		.map(airport -> Repository.getInstance().getAtmosphericInformation(airport.getIata()))
+	    		.filter(ai -> ai.hasSomeValue())
+	    		.forEach(result::add);
+	    	
+	        return Response.status(Response.Status.OK).entity(result).build();
+			
+		} catch (WeatherValidationException e) {
+			LOGGER.log(Level.INFO, "Validation error: " + e.getMessage(), e);
+			return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+		
         
     }
 
