@@ -33,7 +33,7 @@ public class WeatherEndpointTest {
     
     @Before
     public void setUp() throws Exception {
-    	Repository.getInstance().clear();
+    	Repository.getInstance().reset();
         _dp = new DataPoint.Builder()
         		.withCount(10)
         		.withFirst(10)
