@@ -10,8 +10,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.crossover.trial.weather.entity.AirportData;
-import com.crossover.trial.weather.entity.DataPointType;
+import com.crossover.trial.weather.model.AirportData;
+import com.crossover.trial.weather.model.DataPointType;
 
 /**
  * The interface shared to airport weather collection systems.

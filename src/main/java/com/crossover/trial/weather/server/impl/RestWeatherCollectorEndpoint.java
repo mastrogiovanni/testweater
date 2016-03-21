@@ -7,11 +7,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-import com.crossover.trial.weather.entity.AirportData;
-import com.crossover.trial.weather.entity.DataPoint;
-import com.crossover.trial.weather.entity.Repository;
 import com.crossover.trial.weather.exception.WeatherException;
 import com.crossover.trial.weather.exception.WeatherValidationException;
+import com.crossover.trial.weather.model.AirportData;
+import com.crossover.trial.weather.model.DataPoint;
+import com.crossover.trial.weather.model.Repository;
 import com.crossover.trial.weather.server.WeatherCollectorEndpoint;
 import com.crossover.trial.weather.utility.ValidationUtility;
 import com.google.gson.JsonSyntaxException;

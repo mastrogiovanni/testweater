@@ -1,6 +1,6 @@
 package com.crossover.trial.weather.utility;
 
-import com.crossover.trial.weather.entity.AirportData;
+import com.crossover.trial.weather.model.AirportData;
 
 public class DistanceUtility {
 

@@ -1,7 +1,5 @@
-package com.crossover.trial.weather.entity;
+package com.crossover.trial.weather.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -47,10 +45,10 @@ public class Repository {
 	private Repository() {
 		airportData = new TreeMap<>();
 		atmosphericInformation = new TreeMap<>();
-		clear();
+		reset();
 	}
 
-	public synchronized void clear() {
+	public synchronized void reset() {
 		airportData.clear();
 		atmosphericInformation.clear();
 

@@ -10,10 +10,10 @@ import java.util.logging.Logger;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-import com.crossover.trial.weather.entity.AtmosphericInformation;
-import com.crossover.trial.weather.entity.Repository;
-import com.crossover.trial.weather.entity.Statistics;
 import com.crossover.trial.weather.exception.WeatherValidationException;
+import com.crossover.trial.weather.model.AtmosphericInformation;
+import com.crossover.trial.weather.model.Repository;
+import com.crossover.trial.weather.model.Statistics;
 import com.crossover.trial.weather.server.WeatherQueryEndpoint;
 import com.crossover.trial.weather.utility.ValidationUtility;
 import com.google.gson.Gson;
@@ -34,7 +34,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
 	public static final Gson gson = new Gson();
 
 	static {
-		Repository.getInstance().clear();
+		Repository.getInstance().reset();
 	}
 
 	/**

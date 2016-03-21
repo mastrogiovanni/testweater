@@ -1,4 +1,4 @@
-package com.crossover.trial.weather.entity;
+package com.crossover.trial.weather.model;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;

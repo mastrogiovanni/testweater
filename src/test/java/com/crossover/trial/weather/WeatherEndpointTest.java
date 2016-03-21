@@ -10,9 +10,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.crossover.trial.weather.entity.AtmosphericInformation;
-import com.crossover.trial.weather.entity.DataPoint;
-import com.crossover.trial.weather.entity.Repository;
+import com.crossover.trial.weather.model.AtmosphericInformation;
+import com.crossover.trial.weather.model.DataPoint;
+import com.crossover.trial.weather.model.Repository;
 import com.crossover.trial.weather.server.WeatherCollectorEndpoint;
 import com.crossover.trial.weather.server.WeatherQueryEndpoint;
 import com.crossover.trial.weather.server.impl.RestWeatherCollectorEndpoint;

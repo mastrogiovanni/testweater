@@ -1,4 +1,4 @@
-package com.crossover.trial.weather.entity;
+package com.crossover.trial.weather.model;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.crossover.trial.weather.entity;
+package com.crossover.trial.weather.model;
 
 /**
  * The various types of data points we can collect.
