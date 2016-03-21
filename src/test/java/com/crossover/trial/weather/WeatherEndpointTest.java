@@ -1,5 +1,11 @@
 package com.crossover.trial.weather;
 
+import com.crossover.trial.weather.entity.AtmosphericInformation;
+import com.crossover.trial.weather.entity.DataPoint;
+import com.crossover.trial.weather.server.WeatherCollectorEndpoint;
+import com.crossover.trial.weather.server.WeatherQueryEndpoint;
+import com.crossover.trial.weather.server.impl.RestWeatherCollectorEndpoint;
+import com.crossover.trial.weather.server.impl.RestWeatherQueryEndpoint;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -21,9 +27,10 @@ public class WeatherEndpointTest {
     private DataPoint _dp;
     @Before
     public void setUp() throws Exception {
-        RestWeatherQueryEndpoint.init();
         _dp = new DataPoint.Builder()
-                .withCount(10).withFirst(10).withMedian(20).withLast(30).withMean(22).build();
+        		.withCount(10)
+        		.withFirst(10)
+        		.withMedian(20).withLast(30).withMean(22).build();
         _update.updateWeather("BOS", "wind", _gson.toJson(_dp));
         _query.weather("BOS", "0").getEntity();
     }
@@ -46,9 +53,9 @@ public class WeatherEndpointTest {
     public void testGetNearby() throws Exception {
         // check datasize response
         _update.updateWeather("JFK", "wind", _gson.toJson(_dp));
-        _dp.setMean(40);
+        _dp = new DataPoint.Builder().from(_dp).withMean(40).build();
         _update.updateWeather("EWR", "wind", _gson.toJson(_dp));
-        _dp.setMean(30);
+        _dp = new DataPoint.Builder().from(_dp).withMean(30).build();
         _update.updateWeather("LGA", "wind", _gson.toJson(_dp));
 
         List<AtmosphericInformation> ais = (List<AtmosphericInformation>) _query.weather("JFK", "200").getEntity();

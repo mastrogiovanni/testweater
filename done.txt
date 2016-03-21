@@ -1,0 +1,12 @@
+
+- I moved to datapoints aggregation property of a list of datapoints
+
+- Improved encapsulation
+
+
+
+Further Improvements (to decide with clients):
+---------------------------------------------
+
+Use of double can lead to rounding problems: I suggest to pass to BigDecimal istead
+
