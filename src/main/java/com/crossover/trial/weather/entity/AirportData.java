@@ -18,12 +18,14 @@ public class AirportData {
 
     /** longitude value in degrees */
     private double longitude;
+    
+    private AirportData() {}
 
     public String getIata() {
         return iata;
     }
 
-    public void setIata(String iata) {
+    private void setIata(String iata) {
         this.iata = iata;
     }
 
@@ -31,7 +33,7 @@ public class AirportData {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    private void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
@@ -39,19 +41,41 @@ public class AirportData {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    private void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
     public String toString() {
         return ReflectionToStringBuilder.toString(this, ToStringStyle.NO_CLASS_NAME_STYLE);
     }
+    
+    public static class Builder {
+    	
+    	double lat;
+        double lon;
+        String iata;
 
-    public boolean equals(Object other) {
-        if (other instanceof AirportData) {
-            return ((AirportData)other).getIata().equals(this.getIata());
+        public Builder(String iata) {
+        	this.iata = iata;
+        }
+        
+        public Builder withLat(double lat) {
+        	this.lat = lat;
+            return this;
         }
 
-        return false;
+        public Builder withLon(double lon) {
+        	this.lon = lon;
+            return this;
+        }
+
+        public AirportData build() {
+        	AirportData ad = new AirportData();
+        	ad.setIata(this.iata);
+        	ad.setLatitude(this.lat);
+        	ad.setLongitude(this.lon);
+        	return ad;
+        }
+        
     }
 }

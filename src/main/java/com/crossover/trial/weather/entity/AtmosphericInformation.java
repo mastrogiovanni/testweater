@@ -30,7 +30,7 @@ public class AtmosphericInformation {
 		return temperature;
 	}
 
-	public void setTemperature(DataPoint temperature) {
+	void setTemperature(DataPoint temperature) {
 		this.temperature = temperature;
 	}
 
@@ -38,7 +38,7 @@ public class AtmosphericInformation {
 		return wind;
 	}
 
-	public void setWind(DataPoint wind) {
+	void setWind(DataPoint wind) {
 		this.wind = wind;
 	}
 
@@ -46,7 +46,7 @@ public class AtmosphericInformation {
 		return humidity;
 	}
 
-	public void setHumidity(DataPoint humidity) {
+	void setHumidity(DataPoint humidity) {
 		this.humidity = humidity;
 	}
 
@@ -54,7 +54,7 @@ public class AtmosphericInformation {
 		return precipitation;
 	}
 
-	public void setPrecipitation(DataPoint precipitation) {
+	void setPrecipitation(DataPoint precipitation) {
 		this.precipitation = precipitation;
 	}
 
@@ -62,7 +62,7 @@ public class AtmosphericInformation {
 		return pressure;
 	}
 
-	public void setPressure(DataPoint pressure) {
+	void setPressure(DataPoint pressure) {
 		this.pressure = pressure;
 	}
 
@@ -70,7 +70,7 @@ public class AtmosphericInformation {
 		return cloudCover;
 	}
 
-	public void setCloudCover(DataPoint cloudCover) {
+	void setCloudCover(DataPoint cloudCover) {
 		this.cloudCover = cloudCover;
 	}
 
@@ -78,7 +78,7 @@ public class AtmosphericInformation {
 		return this.lastUpdateTime;
 	}
 
-	public void setLastUpdateTime(long lastUpdateTime) {
+	void setLastUpdateTime(long lastUpdateTime) {
 		this.lastUpdateTime = lastUpdateTime;
 	}
 

@@ -1,4 +1,11 @@
-package com.crossover.trial.weather.server;
+package com.crossover.trial.weather;
+
+import static java.lang.String.format;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -11,13 +18,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import com.crossover.trial.weather.server.impl.RestWeatherCollectorEndpoint;
 import com.crossover.trial.weather.server.impl.RestWeatherQueryEndpoint;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.lang.String.*;
-
 
 /**
  * A main method used to test the Weather Application. You are free to modify this main method
@@ -28,9 +28,17 @@ import static java.lang.String.*;
 public class WeatherServer {
 
     private static final String BASE_URL = "http://localhost:9090/";
+    
+    public interface Handler {
+    	void launched();
+    }
 
     public static void main(String[] args) {
-        try {
+        start(null);
+    }
+
+	public static void start(Handler handler) {
+		try {
             System.out.println("Starting Weather App local testing server: " + BASE_URL);
             System.out.println("Not for production use");
 
@@ -55,6 +63,10 @@ public class WeatherServer {
             server.getServerConfiguration().getMonitoringConfig().getWebServerConfig().addProbes(probe);
             System.out.println(format("Weather Server started.\n url=%s\n", BASE_URL));
             server.start();
+            
+            if ( handler != null ) {
+            	handler.launched();
+            }
 
             // blocks until exit
             Thread.currentThread().join();
@@ -62,6 +74,5 @@ public class WeatherServer {
         } catch (IOException | InterruptedException ex) {
             Logger.getLogger(WeatherServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-    }
+	}
 }

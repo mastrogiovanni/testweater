@@ -2,6 +2,7 @@ package com.crossover.trial.weather;
 
 import com.crossover.trial.weather.entity.AtmosphericInformation;
 import com.crossover.trial.weather.entity.DataPoint;
+import com.crossover.trial.weather.entity.Repository;
 import com.crossover.trial.weather.server.WeatherCollectorEndpoint;
 import com.crossover.trial.weather.server.WeatherQueryEndpoint;
 import com.crossover.trial.weather.server.impl.RestWeatherCollectorEndpoint;
@@ -25,12 +26,16 @@ public class WeatherEndpointTest {
     private Gson _gson = new Gson();
 
     private DataPoint _dp;
+    
     @Before
     public void setUp() throws Exception {
+    	Repository.getInstance().clear();
         _dp = new DataPoint.Builder()
         		.withCount(10)
         		.withFirst(10)
-        		.withMedian(20).withLast(30).withMean(22).build();
+        		.withMedian(20)
+        		.withLast(30)
+        		.withMean(22).build();
         _update.updateWeather("BOS", "wind", _gson.toJson(_dp));
         _query.weather("BOS", "0").getEntity();
     }
@@ -66,7 +71,11 @@ public class WeatherEndpointTest {
     public void testUpdate() throws Exception {
 
         DataPoint windDp = new DataPoint.Builder()
-                .withCount(10).withFirst(10).withMedian(20).withLast(30).withMean(22).build();
+                .withCount(10)
+                .withFirst(10)
+                .withMedian(20)
+                .withLast(30)
+                .withMean(22).build();
         _update.updateWeather("BOS", "wind", _gson.toJson(windDp));
         _query.weather("BOS", "0").getEntity();
 

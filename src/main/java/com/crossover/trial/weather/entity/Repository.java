@@ -42,16 +42,23 @@ public class Repository {
 	}
 	
 	private Repository() {
-		
 		airportData = new TreeMap<>();
 		atmosphericInformation = new TreeMap<>();
-
-		addAirport("BOS", 42.364347, -71.005181);
-		addAirport("EWR", 40.6925, -74.168667);
-		addAirport("JFK", 40.639751, -73.778925);
-		addAirport("LGA", 40.777245, -73.872608);
-		addAirport("MMU", 40.79935, -74.4148747);
-
+		clear();
+	}
+	
+	public void clear() {
+		
+		airportData.clear();
+		atmosphericInformation.clear();
+		
+		// Initializing data
+    	addAirport("BOS", 42.364347, -71.005181);
+    	addAirport("EWR", 40.6925, -74.168667);
+    	addAirport("JFK", 40.639751, -73.778925);
+    	addAirport("LGA", 40.777245, -73.872608);
+    	addAirport("MMU", 40.79935, -74.4148747);
+		
 	}
 
     /**
@@ -69,7 +76,7 @@ public class Repository {
             if (ai == null) {
             	throw new WeatherException("Airport not found");
             }
-            update(ai, DataPointType.valueOf(pointType), dp);
+            update(ai, DataPointType.valueOf(pointType.toUpperCase()), dp);
 		}
     }
     
@@ -112,15 +119,22 @@ public class Repository {
      * @param longitude in degrees
      *
      * @return the added airport
+     * @throws WeatherException 
      */
     public AirportData addAirport(String iataCode, double latitude, double longitude) {
     	
-        AirportData ad = new AirportData();
-        ad.setIata(iataCode);
-        ad.setLatitude(latitude);
-        ad.setLatitude(longitude);
-    	
+        AirportData ad = new AirportData.Builder(iataCode)
+        		.withLat(latitude)
+        		.withLon(longitude)
+        		.build();
+
+        AirportData old = null;
+        
     	synchronized (airportData) {
+    		old = airportData.get(iataCode);
+    		if ( old != null ) {
+    			return old;
+    		}
             airportData.put(iataCode, ad);
 		}
 
@@ -131,6 +145,24 @@ public class Repository {
     	
         return ad;
     	
+    }
+    
+    /**
+     * Delete airport
+     * @return True if airport was deleted
+     */
+    public boolean deleteAirport(String iataCode) {
+    	boolean ret = false;
+    	synchronized (airportData) {
+    		ret = airportData.remove(iataCode) != null;
+		}
+    	if ( ret == false ) {
+    		return ret;
+    	}
+    	synchronized (atmosphericInformation) {
+        	atmosphericInformation.remove(iataCode);
+		}
+    	return ret;
     }
 
     /**
@@ -148,8 +180,7 @@ public class Repository {
     	synchronized (atmosphericInformation) {
     		for (AtmosphericInformation ai : atmosphericInformation.values()) {
     			// we only count recent readings
-    			if (ai.getCloudCover() != null || ai.getHumidity() != null || ai.getPressure() != null
-    					|| ai.getPrecipitation() != null || ai.getTemperature() != null || ai.getWind() != null) {
+    			if (ai.hasSomeValue()) {
     				// updated in the last day
     				if (ai.getLastUpdateTime() > System.currentTimeMillis() - 86400000) {
     					datasize++;

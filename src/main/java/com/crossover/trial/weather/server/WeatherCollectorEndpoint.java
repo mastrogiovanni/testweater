@@ -1,6 +1,12 @@
 package com.crossover.trial.weather.server;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -34,6 +40,8 @@ public interface WeatherCollectorEndpoint {
      * @return HTTP Response code
      */
     @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/weather/{iata}/{pointType}")
     Response updateWeather(@PathParam("iata") String iataCode,
                            @PathParam("pointType") String pointType,
@@ -68,7 +76,9 @@ public interface WeatherCollectorEndpoint {
      * @param longString the airport's longitude in degrees as a string [-180, 180]
      * @return HTTP Response code for the add operation
      */
-    @POST
+    @POST    
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/airport/{iata}/{lat}/{long}")
     Response addAirport(@PathParam("iata") String iata,
                         @PathParam("lat") String latString,

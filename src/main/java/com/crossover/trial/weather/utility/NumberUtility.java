@@ -4,16 +4,16 @@ import org.apache.commons.lang3.StringUtils;
 
 public class NumberUtility {
 	
-	public static double parseDoubleOrZero(String value) {
+	public static Double parseDoubleOrNull(String value) {
 		value = StringUtils.stripToNull(value);
 		if ( null == value ) {
-			return 0.0;
+			return null;
 		}
 		try {
 			return Double.parseDouble(value);
 		}
 		catch (NumberFormatException e) {
-			return 0.0;
+			return null;
 		}
 	}
 

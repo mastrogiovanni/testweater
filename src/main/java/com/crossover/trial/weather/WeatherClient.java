@@ -7,6 +7,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import com.crossover.trial.weather.entity.DataPoint;
+import com.crossover.trial.weather.entity.Repository;
 
 /**
  * A reference implementation for the weather client. Consumers of the REST API can look at WeatherClient
@@ -34,27 +35,36 @@ public class WeatherClient {
     public void pingCollect() {
         WebTarget path = collect.path("/ping");
         Response response = path.request().get();
-        System.out.print("collect.ping: " + response.readEntity(String.class) + "\n");
+        dump(response, path);
     }
 
     public void query(String iata) {
-        WebTarget path = query.path("/weather/" + iata + "/0");
+    	query(iata, "0");
+    }
+
+    public void query(String iata, String radius) {
+        WebTarget path = query.path("/weather/" + iata + "/" + radius);
         Response response = path.request().get();
-        System.out.println("query." + iata + ".0: " + response.readEntity(String.class));
+        dump(response, path);
     }
 
     public void pingQuery() {
         WebTarget path = query.path("/ping");
         Response response = path.request().get();
-        System.out.println("query.ping: " + response.readEntity(String.class));
+        dump(response, path);
     }
 
     public void populate(String pointType, int first, int last, int mean, int median, int count) {
         WebTarget path = collect.path("/weather/BOS/" + pointType);
         DataPoint dp = new DataPoint.Builder()
-                .withFirst(first).withLast(last).withMean(mean).withMedian(median).withCount(count)
+                .withFirst(first)
+                .withLast(last)
+                .withMean(mean)
+                .withMedian(median)
+                .withCount(count)
                 .build();
         Response post = path.request().post(Entity.entity(dp, "application/json"));
+        dump(post, path);
     }
 
     public void exit() {
@@ -64,7 +74,11 @@ public class WeatherClient {
             // swallow
         }
     }
-
+    
+    private void dump(Response response, WebTarget path) {
+        System.out.println(path.getUri() + ": (" + response.getStatusInfo() + ") - " + response.readEntity(String.class));
+    }
+    
     public static void main(String[] args) {
         WeatherClient wc = new WeatherClient();
         wc.pingCollect();

@@ -31,7 +31,11 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
 
     /** shared gson json to object factory */
     public static final Gson gson = new Gson();
-
+    
+    static {
+    	Repository.getInstance().clear();
+    }
+    
     /**
      * Retrieve service health including total size of valid data points and request frequency information.
      *
@@ -43,8 +47,8 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     	Map<String, Object> healthStatus = new HashMap<>();
     	
     	healthStatus.put("datasize", Repository.getInstance().getDataSize());
-    	healthStatus.put("iata_freq", Statistics.instance().getIataFreq());
-    	healthStatus.put("radius_freq", Statistics.instance().getRadiusFreqHistogram());
+    	healthStatus.put("iata_freq", Statistics.getInstance().getIataFreq());
+    	healthStatus.put("radius_freq", Statistics.getInstance().getRadiusFreqHistogram());
     	
     	return gson.toJson(healthStatus);
     }
@@ -62,15 +66,19 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     public Response weather(String iataCode, String radiusString) {
     	
     	// Get number and adjust it to zero eventually
-    	double radius = NumberUtility.parseDoubleOrZero(radiusString);
+    	Double radius = NumberUtility.parseDoubleOrNull(radiusString);
+    	
+    	if ( radius == null ) {
+        	return Response.status(Response.Status.BAD_REQUEST).entity("Radius must be a number greater or equal to zero").build();
+    	}
 
     	// Negative radius are not allowed
     	if ( radius < 0 ) {
-        	return Response.status(Response.Status.BAD_REQUEST).build();
+        	return Response.status(Response.Status.BAD_REQUEST).entity("Radius must be a number greater or equal to zero").build();
     	}
 
     	// Update statistics on data
-    	Statistics.instance().updateRequestFrequency(iataCode, radius);
+    	Statistics.getInstance().updateRequestFrequency(iataCode, radius);
     	
     	// Get list of airport in a given range
     	List<AirportData> airportInRadius;

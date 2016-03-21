@@ -1,7 +1,5 @@
 package com.crossover.trial.weather.server.impl;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,76 +16,73 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 /**
- * A REST implementation of the WeatherCollector API. Accessible only to airport weather collection
- * sites via secure VPN.
+ * A REST implementation of the WeatherCollector API. Accessible only to airport
+ * weather collection sites via secure VPN.
  *
  * @author code test administrator
  */
 
 @Path("/collect")
 public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
+
+	public final static Logger LOGGER = Logger.getLogger(RestWeatherCollectorEndpoint.class.getName());
+
+	/** shared gson json to object factory */
+	public final static Gson gson = new Gson();
 	
-    public final static Logger LOGGER = Logger.getLogger(RestWeatherCollectorEndpoint.class.getName());
+	@Override
+	public Response ping() {
+		return Response.status(Response.Status.OK).entity("ready").build();
+	}
 
-    /** shared gson json to object factory */
-    public final static Gson gson = new Gson();
+	@Override
+	public Response updateWeather(String iataCode, String pointType, String datapointJson) {
+		try {
+			Repository.getInstance().addDataPoint(iataCode, pointType, gson.fromJson(datapointJson, DataPoint.class));
+		} catch (JsonSyntaxException e) {
+			LOGGER.log(Level.SEVERE, "Cannot add datapoint: bad request", e);
+			Response.status(Response.Status.BAD_REQUEST).entity("Cannot add datapoint: bad request").build();
+		} catch (WeatherException e) {
+			LOGGER.log(Level.SEVERE, "Cannot add datapoint: " + e.getMessage(), e);
+			Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Cannot add datapoint: " + e.getMessage())
+					.build();
+		}
+		return Response.status(Response.Status.OK).build();
+	}
 
-    @Override
-    public Response ping() {
-        return Response.status(Response.Status.OK).entity("ready").build();
-    }
+	@Override
+	public Response getAirports() {
+		return Response.status(Response.Status.OK).entity(Repository.getInstance().getAirports()).build();
+	}
 
-    @Override
-    public Response updateWeather(@PathParam("iata") String iataCode,
-                                  @PathParam("pointType") String pointType,
-                                  String datapointJson) {
-        try {
-            Repository.getInstance().addDataPoint(iataCode, pointType, gson.fromJson(datapointJson, DataPoint.class));
-        }
-        catch (JsonSyntaxException e) {
-        	LOGGER.log(Level.SEVERE, "Cannot add datapoint: bad request", e);
-        	Response.status(Response.Status.BAD_REQUEST).build();
-        } catch (WeatherException e) {
-        	LOGGER.log(Level.SEVERE, "Cannot add datapoint", e);
-        	Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-        return Response.status(Response.Status.OK).build();
-    }
+	@Override
+	public Response getAirport(@PathParam("iata") String iata) {
+		AirportData ad = Repository.getInstance().findAirportData(iata);
+		return Response.status(Response.Status.OK).entity(ad).build();
+	}
 
+	@Override
+	public Response addAirport(String iata, String latString, String longString) {
+		try {
+			Repository.getInstance().addAirport(iata, Double.valueOf(latString), Double.valueOf(longString));
+		} catch (NumberFormatException e) {
+			return Response.status(Response.Status.BAD_REQUEST).entity("Latitude and Longitude must be valid numbers").build();
+		}
+		return Response.status(Response.Status.OK).build();
+	}
 
-    @Override
-    public Response getAirports() {
-        return Response.status(Response.Status.OK).entity(Repository.getInstance().getAirports()).build();
-    }
+	@Override
+	public Response deleteAirport(@PathParam("iata") String iata) {
+		if (Repository.getInstance().deleteAirport(iata)) {
+			return Response.status(Response.Status.OK).build();
+		}
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
 
+	@Override
+	public Response exit() {
+		System.exit(0);
+		return Response.noContent().build();
+	}
 
-    @Override
-    public Response getAirport(@PathParam("iata") String iata) {
-        AirportData ad = Repository.getInstance().findAirportData(iata);
-        return Response.status(Response.Status.OK).entity(ad).build();
-    }
-
-
-    @Override
-    public Response addAirport(@PathParam("iata") String iata,
-                               @PathParam("lat") String latString,
-                               @PathParam("long") String longString) {
-        Repository.getInstance().addAirport(iata, Double.valueOf(latString), Double.valueOf(longString));
-        return Response.status(Response.Status.OK).build();
-    }
-
-
-    @Override
-    public Response deleteAirport(@PathParam("iata") String iata) {
-    	
-    	
-        return Response.status(Response.Status.NOT_IMPLEMENTED).build();
-    }
-
-    @Override
-    public Response exit() {
-        System.exit(0);
-        return Response.noContent().build();
-    }
-    
 }

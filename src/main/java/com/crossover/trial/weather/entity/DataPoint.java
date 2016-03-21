@@ -85,7 +85,7 @@ public class DataPoint {
         int last;
         int count;
 
-        public Builder() { }
+        public Builder() {}
         
         public Builder from(DataPoint dp) {
         	this.first = dp.getFirst();
