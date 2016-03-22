@@ -35,7 +35,12 @@ public class Statistics {
 		requestFrequency = new HashMap<String, Integer>();
 		radiusFreq = new HashMap<Double, Integer>();
 	}
-	
+
+	public synchronized void reset() {
+		requestFrequency.clear();
+		radiusFreq.clear();
+	}
+
     /**
      * Records information about how often requests are made
      *

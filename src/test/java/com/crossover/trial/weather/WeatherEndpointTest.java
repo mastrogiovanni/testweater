@@ -1,12 +1,13 @@
 package com.crossover.trial.weather;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public class WeatherEndpointTest {
     }
 
     @Test
-    public void testPing() throws Exception {
+    public void testQueryPing() throws Exception {
         String ping = _query.ping();
         JsonElement pingResult = new JsonParser().parse(ping);
         assertEquals(1, pingResult.getAsJsonObject().get("datasize").getAsInt());
@@ -53,11 +54,16 @@ public class WeatherEndpointTest {
     }
 
     @Test
-    public void testGet() throws Exception {
+    public void testQueryWeather() throws Exception {
+    	
         List<AtmosphericInformation> ais = (List<AtmosphericInformation>) _query.weather("BOS", "0").getEntity();
         assertEquals(ais.get(0).getWind(), _dp);
+        
+        ais = (List<AtmosphericInformation>) _query.weather("XXX", "0").getEntity();
+        assertNotNull(ais);
+        assertEquals(0, ais.size());
     }
-
+    
     @Test
     public void testGetNearby() throws Exception {
         // check datasize response
@@ -72,14 +78,15 @@ public class WeatherEndpointTest {
     }
 
     @Test
-    public void testUpdate() throws Exception {
+    public void testUpdateWeather() throws Exception {
 
         DataPoint windDp = new DataPoint.Builder()
                 .withCount(10)
                 .withFirst(10)
                 .withMedian(20)
                 .withLast(30)
-                .withMean(22).build();
+                .withMean(22)
+                .build();
         _update.updateWeather("BOS", "wind", _gson.toJson(windDp));
         _query.weather("BOS", "0").getEntity();
 
@@ -88,18 +95,19 @@ public class WeatherEndpointTest {
         assertEquals(1, pingResult.getAsJsonObject().get("datasize").getAsInt());
 
         DataPoint cloudCoverDp = new DataPoint.Builder()
-                .withCount(4).withFirst(10).withMedian(60).withLast(100).withMean(50).build();
+                .withCount(4)
+                .withFirst(10)
+                .withMedian(60)
+                .withLast(100)
+                .withMean(50)
+                .build();
         _update.updateWeather("BOS", "cloudcover", _gson.toJson(cloudCoverDp));
 
         List<AtmosphericInformation> ais = (List<AtmosphericInformation>) _query.weather("BOS", "0").getEntity();
         assertEquals(ais.get(0).getWind(), windDp);
         assertEquals(ais.get(0).getCloudCover(), cloudCoverDp);
-    }
-    
-    @Test
-    public void testBadUpdate() throws Exception {
-
-        DataPoint windDp = new DataPoint.Builder()
+        
+        windDp = new DataPoint.Builder()
                 .withCount(10)
                 .withFirst(10)
                 .withMedian(20)
@@ -107,41 +115,70 @@ public class WeatherEndpointTest {
                 .withMean(22).build();
         
         Response response = _update.updateWeather("PIPPO", "wind", _gson.toJson(windDp));
-        Assert.assertNotEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
         response = _update.updateWeather("pi", "wind", _gson.toJson(windDp));
-        Assert.assertNotEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
         response = _update.updateWeather("BOS", "wind", _gson.toJson(windDp));
-        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        
     }
-    
+        
     @Test
-    public void testBadAirportInsert() {
+    public void testAddAirport() {
     	
     	Response response = null;
     	
     	response = _update.addAirport(null, null, null);
-        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
     	response = _update.addAirport("pi", null, null);
-        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
     	response = _update.addAirport("pip", null, null);
-        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
     	response = _update.addAirport("pip", "23b", null);
-        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
     	response = _update.addAirport("pip", "23", "wer");
-        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
     	response = _update.addAirport("pip", "23,23", "12.45");
-        Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
     	response = _update.addAirport("pip", "23.23", "12.45");
-        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+    }
+    
+    @Test
+    public void testDeleteAirport() {
+    	
+    	Response response = null;
+    	
+    	response = _update.deleteAirport("Pippo");
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+    	response = _update.deleteAirport("PPP");
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+    	response = _update.deleteAirport("BOS");
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+    }
+    
+    @Test
+    public void testGetAirport() {
+    	
+    	Response response = _update.getAirport("BOS");
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertNotNull(response.getEntity());
+
+    	response = _update.getAirport("XXX");
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertNull(response.getEntity());
 
     }
     

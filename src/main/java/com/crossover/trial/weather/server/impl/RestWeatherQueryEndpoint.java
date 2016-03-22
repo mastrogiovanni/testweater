@@ -4,19 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-import com.crossover.trial.weather.exception.WeatherValidationException;
+import com.crossover.trial.weather.exception.WeatherException;
 import com.crossover.trial.weather.model.AtmosphericInformation;
 import com.crossover.trial.weather.model.Repository;
 import com.crossover.trial.weather.model.Statistics;
 import com.crossover.trial.weather.server.WeatherQueryEndpoint;
-import com.crossover.trial.weather.utility.ValidationUtility;
-import com.google.gson.Gson;
+import static com.crossover.trial.weather.utility.ValidationUtility.*;
 
 /**
  * The Weather App REST endpoint allows clients to query, update and check
@@ -26,16 +24,9 @@ import com.google.gson.Gson;
  * @author code test administrator
  */
 @Path("/query")
-public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
+public class RestWeatherQueryEndpoint extends AbstractRestEndpoint implements WeatherQueryEndpoint {
 
 	public final static Logger LOGGER = Logger.getLogger("WeatherQuery");
-
-	/** shared gson json to object factory */
-	public static final Gson gson = new Gson();
-
-	static {
-		Repository.getInstance().reset();
-	}
 
 	/**
 	 * Retrieve service health including total size of valid data points and
@@ -73,11 +64,11 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
 
 		try {
 
-			iataCode = ValidationUtility.checkIataCode(iataCode);
+			iataCode = checkIataCode(iataCode);
 
-			double radius = ValidationUtility.isADouble("radius", radiusString);
+			double radius = isADouble("radius", radiusString);
 
-			ValidationUtility.checkRadius(radius);
+			checkRadius(radius);
 
 			// Update statistics on data
 			Statistics.getInstance().updateRequestFrequency(iataCode, radius);
@@ -85,16 +76,15 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
 			// Result of atmosferical conditions
 			List<AtmosphericInformation> result = new ArrayList<>();
 
-			Repository.getInstance().getAirportsFromIataInRadius(iataCode, radius)
+			Repository.getInstance().getAirportsFromIataInRadius(iataCode, radius).stream()
 					.map(airport -> Repository.getInstance().getAtmosphericInformation(airport.getIata()))
 					.filter(ai -> ai.hasSomeValue())
 					.forEach(result::add);
 
 			return Response.status(Response.Status.OK).entity(result).build();
 
-		} catch (WeatherValidationException e) {
-			LOGGER.log(Level.INFO, "Validation error: " + e.getMessage());
-			return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+		} catch (WeatherException e) {
+			return getResponseByException(e);
 		}
 
 	}

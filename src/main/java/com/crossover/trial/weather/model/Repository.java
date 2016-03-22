@@ -1,13 +1,15 @@
 package com.crossover.trial.weather.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Stream;
+
+import javax.ws.rs.core.Response.Status;
 
 import com.crossover.trial.weather.exception.WeatherException;
-import com.crossover.trial.weather.exception.WeatherValidationException;
 import com.crossover.trial.weather.utility.DistanceUtility;
 import com.crossover.trial.weather.utility.ValidationUtility;
 
@@ -62,27 +64,23 @@ public class Repository {
 
 	/**
 	 * Update the airports weather data with the collected data.
-	 *
-	 * @param iataCode
-	 *            the 3 letter IATA code
-	 * @param pointType
-	 *            the point type {@link DataPointType}
-	 * @param dp
-	 *            a datapoint object holding pointType data
-	 *
-	 * @throws WeatherException
-	 *             if the update can not be completed
+	 * 
+	 * @param iataCode the 3 letter IATA code
+	 * @param pointType the point type {@link DataPointType}
+	 * @param dp a datapoint object holding pointType data
+	 * @return True is data point was added. False if airport for given IATA code was not found
+	 * @throws WeatherException 
 	 */
-	public synchronized void addDataPoint(String iataCode, String pointType, DataPoint dp) throws WeatherException {
+	public synchronized boolean addDataPoint(String iataCode, DataPointType pointType, DataPoint dp) throws WeatherException {
 		AtmosphericInformation ai = atmosphericInformation.get(iataCode);
 		if (ai == null) {
-			throw new WeatherException("Airport not found");
+			throw new WeatherException("airport not found", Status.BAD_REQUEST);
 		}
-		update(ai, DataPointType.valueOf(pointType.toUpperCase()), dp);
+		update(ai, pointType, dp);
+		return true;
 	}
 
-	public synchronized Stream<AirportData> getAirportsFromIataInRadius(String iataCode, double radius)
-			throws WeatherValidationException {
+	public synchronized List<AirportData> getAirportsFromIataInRadius(String iataCode, double radius) throws WeatherException {
 
 		ValidationUtility.checkRadius(radius);
 
@@ -90,11 +88,17 @@ public class Repository {
 
 		AirportData origin = airportData.get(iataCode);
 
+		List<AirportData> result = new ArrayList<>();
+
 		if (origin == null) {
-			return Stream.empty();
+			return result;
 		}
 
-		return airportData.values().stream().filter(x -> DistanceUtility.calculateDistance(origin, x) <= radius);
+		airportData.values().stream()
+			.filter(x -> DistanceUtility.calculateDistance(origin, x) <= radius)
+			.forEach(result::add);
+		
+		return result;
 
 	}
 
@@ -112,12 +116,9 @@ public class Repository {
 	/**
 	 * Add a new known airport to our list.
 	 *
-	 * @param iataCode
-	 *            3 letter code
-	 * @param latitude
-	 *            in degrees
-	 * @param longitude
-	 *            in degrees
+	 * @param iataCode 3 letter code
+	 * @param latitude in degrees
+	 * @param longitude in degrees
 	 *
 	 * @return the added airport
 	 */
@@ -183,14 +184,15 @@ public class Repository {
 	 * update atmospheric information with the given data point for the given
 	 * point type
 	 *
-	 * @param ai
-	 *            the atmospheric information object to update
-	 * @param pointType
-	 *            the data point type as a string
-	 * @param dp
-	 *            the actual data point
+	 * @param ai the atmospheric information object to update
+	 * @param pointType the data point type as a string
+	 * @param dp the actual data point
 	 */
 	private void update(AtmosphericInformation ai, DataPointType dptype, DataPoint dp) throws WeatherException {
+		
+		if ( dptype == null ) {
+			throw new WeatherException("type of data to upload must be specified", Status.BAD_REQUEST);
+		}
 
 		switch (dptype) {
 		case WIND:
@@ -243,7 +245,7 @@ public class Repository {
 
 		}
 
-		throw new WeatherException("couldn't update atmospheric data");
+		throw new WeatherException("couldn't update atmospheric data", Status.BAD_REQUEST);
 
 	}
 
