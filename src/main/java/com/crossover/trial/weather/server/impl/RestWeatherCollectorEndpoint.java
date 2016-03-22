@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import com.crossover.trial.weather.exception.WeatherException;
 import com.crossover.trial.weather.model.AirportData;
@@ -35,7 +34,7 @@ public class RestWeatherCollectorEndpoint extends AbstractRestEndpoint implement
 	@Override
 	public Response ping() {
 		LOGGER.log(Level.FINE, "Ping received");
-		return Response.status(Response.Status.OK).entity("ready").build();
+		return Response.status(Response.Status.OK).entity("1").build();
 	}
 
 	@Override

@@ -26,9 +26,13 @@ public class AirportLoader {
     /** end point to supply updates */
     private WebTarget collect;
 
+    /** end point for read queries */
+    private WebTarget query;
+
     public AirportLoader() {
         Client client = ClientBuilder.newClient();
-        collect = client.target("http://localhost:9090/collect");
+        collect = client.target("http://localhost:8080/collect");
+        query = client.target("http://localhost:8080/query");
     }
 
     public void upload(InputStream airportDataStream) throws IOException {
@@ -79,15 +83,10 @@ public class AirportLoader {
 	        	System.out.println("Error in saving airport: " + post.getEntity().toString());
 	        	break;
 	        }
-	        // dump(post, path);
 
 		}
-		
+				
     }
-
-//    private void dump(Response response, WebTarget path) {
-//        System.out.println(path.getUri() + ": (" + response.getStatusInfo() + ") - " + response.readEntity(String.class));
-//    }
 
 	private String get(String[] list, int index) {
 		if ( index >= list.length ) {
